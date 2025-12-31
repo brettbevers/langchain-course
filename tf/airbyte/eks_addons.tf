@@ -2,8 +2,10 @@
 resource "aws_eks_addon" "ebs_csi_driver" {
   cluster_name             = module.eks.cluster_name
   addon_name               = "aws-ebs-csi-driver"
-  addon_version            = "v1.25.0-eksbuild.1"
   service_account_role_arn = aws_iam_role.ebs_csi_driver.arn
+
+  # Use default version compatible with cluster version
+  resolve_conflicts_on_create = "OVERWRITE"
 
   tags = local.common_tags
 
@@ -12,9 +14,11 @@ resource "aws_eks_addon" "ebs_csi_driver" {
 
 # VPC CNI Add-on
 resource "aws_eks_addon" "vpc_cni" {
-  cluster_name  = module.eks.cluster_name
-  addon_name    = "vpc-cni"
-  addon_version = "v1.15.0-eksbuild.2"
+  cluster_name = module.eks.cluster_name
+  addon_name   = "vpc-cni"
+
+  # Use default version compatible with cluster version
+  resolve_conflicts_on_create = "OVERWRITE"
 
   tags = local.common_tags
 
@@ -23,9 +27,11 @@ resource "aws_eks_addon" "vpc_cni" {
 
 # CoreDNS Add-on
 resource "aws_eks_addon" "coredns" {
-  cluster_name  = module.eks.cluster_name
-  addon_name    = "coredns"
-  addon_version = "v1.10.1-eksbuild.2"
+  cluster_name = module.eks.cluster_name
+  addon_name   = "coredns"
+
+  # Use default version compatible with cluster version
+  resolve_conflicts_on_create = "OVERWRITE"
 
   tags = local.common_tags
 
@@ -34,9 +40,11 @@ resource "aws_eks_addon" "coredns" {
 
 # Kube-proxy Add-on
 resource "aws_eks_addon" "kube_proxy" {
-  cluster_name  = module.eks.cluster_name
-  addon_name    = "kube-proxy"
-  addon_version = "v1.28.1-eksbuild.1"
+  cluster_name = module.eks.cluster_name
+  addon_name   = "kube-proxy"
+
+  # Use default version compatible with cluster version
+  resolve_conflicts_on_create = "OVERWRITE"
 
   tags = local.common_tags
 

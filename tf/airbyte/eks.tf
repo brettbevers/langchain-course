@@ -50,3 +50,24 @@ module "eks" {
 
   tags = local.common_tags
 }
+
+# Grant service user access to the EKS cluster
+resource "aws_eks_access_entry" "service_user" {
+  cluster_name  = module.eks.cluster_name
+  principal_arn = "arn:aws:iam::016784657549:user/service"
+  type          = "STANDARD"
+
+  depends_on = [module.eks]
+}
+
+resource "aws_eks_access_policy_association" "service_user_admin" {
+  cluster_name  = module.eks.cluster_name
+  principal_arn = "arn:aws:iam::016784657549:user/service"
+  policy_arn    = "arn:aws:eks::aws:cluster-access-policy/AmazonEKSClusterAdminPolicy"
+
+  access_scope {
+    type = "cluster"
+  }
+
+  depends_on = [aws_eks_access_entry.service_user]
+}

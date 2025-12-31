@@ -8,7 +8,7 @@ single_nat_gateway   = true  # Cost optimization for dev
 # RDS Configuration
 db_instance_class    = "db.t3.medium"
 db_allocated_storage = 50
-db_engine_version    = "15.4"
+db_engine_version    = "15"
 db_name              = "airbyte"
 db_username          = "airbyte_admin"
 db_multi_az          = false  # Set true for prod

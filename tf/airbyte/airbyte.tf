@@ -8,7 +8,11 @@ resource "kubernetes_namespace" "airbyte" {
     }
   }
 
-  depends_on = [module.eks]
+  depends_on = [
+    module.eks,
+    aws_eks_access_entry.service_user,
+    aws_eks_access_policy_association.service_user_admin
+  ]
 }
 
 # Kubernetes service account for Airbyte

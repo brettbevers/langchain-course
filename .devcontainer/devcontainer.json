@@ -5,7 +5,7 @@
         "../docker/dev-box/docker-compose.yml"
     ],
     "service": "dev-box",
-    "workspaceFolder": "/workspaces/langchain-course",
+    "workspaceFolder": "/workspaces/",
     "containerEnv": {},
     // Configure tool-specific properties.
     "customizations": {

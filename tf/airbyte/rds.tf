@@ -13,8 +13,9 @@ resource "aws_db_subnet_group" "airbyte" {
 
 # Random password for RDS
 resource "random_password" "db_password" {
-  length  = 32
-  special = true
+  length           = 32
+  special          = true
+  override_special = "!#$%&*()-_=+[]{}<>:?"
 }
 
 # Store password in AWS Secrets Manager
