@@ -1,0 +1,65 @@
+// For format details, see https://aka.ms/devcontainer.json. For config options, see the README at:
+// https://github.com/microsoft/vscode-dev-containers/tree/v0.245.2/containers/python-3
+{
+    "dockerComposeFile": [
+        "../docker/dev-box/docker-compose.yml"
+    ],
+    "service": "dev-box",
+    "workspaceFolder": "/workspaces/langchain-course",
+    "containerEnv": {},
+    // Configure tool-specific properties.
+    "customizations": {
+        // Configure properties specific to VS Code.
+        "vscode": {
+            // Set *default* container specific settings.json values on container create.
+            "settings": {
+                // Python
+                "python.defaultInterpreterPath": "/home/vscode/.pyenv/shims/python",
+                "python.languageServer": "Pylance",
+                "python.testing.pytestEnabled": true,
+                "python.testing.pytestArgs": [
+                    "tests"
+                ],
+                // Integrated Terminal
+                "terminal.integrated.defaultProfile.linux": "zsh",
+                "terminal.integrated.profiles.linux": {
+                    "zsh": {
+                        "path": "zsh"
+                    }
+                }
+            },
+            // Add the IDs of extensions you want installed when the container is created.
+            "extensions": [
+                "ms-python.python",
+                "ms-python.vscode-pylance",
+                "ms-toolsai.jupyter",
+                "charliermarsh.ruff",
+                "njpwerner.autodocstring",
+                "tamasfe.even-better-toml",
+                "yzhang.markdown-all-in-one",
+                "hashicorp.terraform",
+                "redhat.vscode-yaml",
+                "bierner.markdown-mermaid",
+                "eamodio.gitlens",
+                "github.vscode-github-actions",
+                "github.copilot",
+                "github.copilot-chat",
+                "snowflake.snowflake-vsc",
+                "hediet.vscode-drawio",
+                "matt-meyers.vscode-dbml",
+                "bocovo.dbml-erd-visualizer",
+                "ms-azuretools.vscode-docker"
+            ]
+        }
+    },
+    // Use 'forwardPorts' to make a list of ports inside the container available locally.
+    "forwardPorts": [],
+    // Use 'postCreateCommand' to run commands after the container is created.
+    "postStartCommand": "",
+    // Comment out to connect as root instead. More info: https://aka.ms/vscode-remote/containers/non-root.
+    "remoteUser": "vscode",
+    "postCreateCommand": "git config --global --add safe.directory ${containerWorkspaceFolder} && zsh .devcontainer/post_create.sh", // paths to scripts must be relative within repository
+    "features": {
+        "ghcr.io/devcontainers/features/docker-in-docker:2": {}
+    }
+}

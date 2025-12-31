@@ -1,0 +1,13 @@
+services:
+  test:
+    build:
+      context: .
+      platforms:
+        - linux/amd64
+    volumes:
+      - type: bind
+        source: ../../services
+        target: /usr/src/services
+      - type: bind
+        source: ../../packages
+        target: /usr/src/packages

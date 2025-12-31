@@ -1,0 +1,27 @@
+version: '2.0'
+
+services:
+  dev-box:
+    stdin_open: true
+    tty: true
+    build:
+      context: ../..
+      target: langchain-course
+      dockerfile: docker/dev-box/Dockerfile
+      args:
+        - VARIANT=3.12-bullseye
+        - NODE_VERSION=lts/*
+    environment:
+      - PYARROW_IGNORE_TIMEZONE="1"
+      # - PYTHONPATH=/workspaces/st2-lakehouse/services/data_ingestion/src:/workspaces/st2-lakehouse/services/data_mining/src
+    volumes:
+      - ../..:/workspaces/langchain-course
+      - ${HOME}/.ssh:/home/vscode/.ssh
+      - ${HOME}/.aws:/home/vscode/.aws
+      - ${HOME}/.config:/home/vscode/.config
+      - ./commandhistory:/commandhistory
+    networks:
+      dev-box:
+
+networks:
+  dev-box:
