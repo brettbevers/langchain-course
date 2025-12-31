@@ -116,6 +116,24 @@ resource "helm_release" "airbyte" {
             memory = "4Gi"
           }
         }
+        extraEnv = [
+          {
+            name  = "DATABASE_HOST"
+            value = aws_db_instance.airbyte.address
+          },
+          {
+            name  = "DATABASE_PORT"
+            value = tostring(aws_db_instance.airbyte.port)
+          },
+          {
+            name  = "DATABASE_DB"
+            value = var.db_name
+          },
+          {
+            name  = "DATABASE_URL"
+            value = "jdbc:postgresql://${aws_db_instance.airbyte.address}:${aws_db_instance.airbyte.port}/${var.db_name}"
+          }
+        ]
       }
 
       # Worker configuration
@@ -132,12 +150,70 @@ resource "helm_release" "airbyte" {
             memory = "4Gi"
           }
         }
+        extraEnv = [
+          {
+            name  = "DATABASE_HOST"
+            value = aws_db_instance.airbyte.address
+          },
+          {
+            name  = "DATABASE_PORT"
+            value = tostring(aws_db_instance.airbyte.port)
+          },
+          {
+            name  = "DATABASE_DB"
+            value = var.db_name
+          },
+          {
+            name  = "DATABASE_URL"
+            value = "jdbc:postgresql://${aws_db_instance.airbyte.address}:${aws_db_instance.airbyte.port}/${var.db_name}"
+          }
+        ]
       }
 
       # Temporal configuration
       temporal = {
         enabled      = true
         replicaCount = 1
+        extraEnv = [
+          {
+            name  = "DATABASE_HOST"
+            value = aws_db_instance.airbyte.address
+          },
+          {
+            name  = "DATABASE_PORT"
+            value = tostring(aws_db_instance.airbyte.port)
+          },
+          {
+            name  = "DATABASE_DB"
+            value = var.db_name
+          },
+          {
+            name  = "DATABASE_URL"
+            value = "jdbc:postgresql://${aws_db_instance.airbyte.address}:${aws_db_instance.airbyte.port}/${var.db_name}"
+          }
+        ]
+      }
+
+      # Bootloader configuration - fix database connection
+      bootloader = {
+        extraEnv = [
+          {
+            name  = "DATABASE_HOST"
+            value = aws_db_instance.airbyte.address
+          },
+          {
+            name  = "DATABASE_PORT"
+            value = tostring(aws_db_instance.airbyte.port)
+          },
+          {
+            name  = "DATABASE_DB"
+            value = var.db_name
+          },
+          {
+            name  = "DATABASE_URL"
+            value = "jdbc:postgresql://${aws_db_instance.airbyte.address}:${aws_db_instance.airbyte.port}/${var.db_name}"
+          }
+        ]
       }
 
       # Disable internal PostgreSQL
