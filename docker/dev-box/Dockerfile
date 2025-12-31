@@ -85,6 +85,27 @@ RUN curl -L https://raw.githubusercontent.com/warrensbox/terraform-switcher/rele
     # Use latest
     && tfswitch -u
 
+## AWS CLI (architecture-aware)
+RUN ARCH=$(uname -m) && \
+    if [ "$ARCH" = "aarch64" ]; then \
+        curl "https://awscli.amazonaws.com/awscli-exe-linux-aarch64.zip" -o "awscliv2.zip"; \
+    else \
+        curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"; \
+    fi && \
+    unzip awscliv2.zip && \
+    sudo ./aws/install && \
+    rm -rf awscliv2.zip aws
+
+## kubectl (architecture-aware)
+RUN ARCH=$(uname -m) && \
+    if [ "$ARCH" = "aarch64" ]; then KUBECTL_ARCH="arm64"; else KUBECTL_ARCH="amd64"; fi && \
+    curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/${KUBECTL_ARCH}/kubectl" && \
+    chmod +x kubectl && \
+    sudo mv kubectl /usr/local/bin/
+
+## Helm
+RUN curl https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
+
 ## Azure CLI
 RUN curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash
 
