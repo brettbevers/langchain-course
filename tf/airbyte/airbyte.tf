@@ -45,7 +45,8 @@ resource "kubernetes_secret" "database" {
   }
 }
 
-# Helm release for Airbyte
+# Install Airbyte using Helm Chart V2 (version 1.9.2 / App 2.0.1)
+# Configuration validated against official Chart V2 documentation
 resource "helm_release" "airbyte" {
   name       = "airbyte"
   repository = "https://airbytehq.github.io/helm-charts"
@@ -53,184 +54,110 @@ resource "helm_release" "airbyte" {
   version    = var.airbyte_version
   namespace  = kubernetes_namespace.airbyte.metadata[0].name
 
-  values = [
-    yamlencode({
-      global = {
-        serviceAccountName = kubernetes_service_account.airbyte.metadata[0].name
+  # Service account for IRSA
+  set {
+    name  = "global.serviceAccountName"
+    value = kubernetes_service_account.airbyte.metadata[0].name
+  }
 
-        # Database configuration
-        database = {
-          type     = "external"
-          host     = aws_db_instance.airbyte.address
-          port     = aws_db_instance.airbyte.port
-          database = var.db_name
-          user     = var.db_username
-          password = random_password.db_password.result
-        }
+  # S3 Storage (Chart V2 schema)
+  set {
+    name  = "global.storage.type"
+    value = "s3"
+  }
 
-        # Storage configuration
-        storage = {
-          type   = "S3"
-          bucket = aws_s3_bucket.airbyte_logs.id
-          region = var.aws_region
-        }
+  set {
+    name  = "global.storage.bucket.log"
+    value = aws_s3_bucket.airbyte_logs.id
+  }
 
-        # Environment-specific settings
-        env = local.env
-      }
+  set {
+    name  = "global.storage.bucket.state"
+    value = aws_s3_bucket.airbyte_logs.id
+  }
 
-      # Webapp configuration
-      webapp = {
-        enabled      = true
-        replicaCount = 1
-        service = {
-          type = "LoadBalancer"
-          annotations = {
-            "service.beta.kubernetes.io/aws-load-balancer-type"   = "nlb"
-            "service.beta.kubernetes.io/aws-load-balancer-scheme" = "internet-facing"
-          }
-        }
-        resources = {
-          requests = {
-            cpu    = "500m"
-            memory = "1Gi"
-          }
-          limits = {
-            cpu    = "1000m"
-            memory = "2Gi"
-          }
-        }
-      }
+  set {
+    name  = "global.storage.bucket.workloadOutput"
+    value = aws_s3_bucket.airbyte_logs.id
+  }
 
-      # Server configuration
-      server = {
-        enabled      = true
-        replicaCount = 1
-        resources = {
-          requests = {
-            cpu    = "500m"
-            memory = "1Gi"
-          }
-          limits = {
-            cpu    = "2000m"
-            memory = "4Gi"
-          }
-        }
-        extraEnv = [
-          {
-            name  = "DATABASE_HOST"
-            value = aws_db_instance.airbyte.address
-          },
-          {
-            name  = "DATABASE_PORT"
-            value = tostring(aws_db_instance.airbyte.port)
-          },
-          {
-            name  = "DATABASE_DB"
-            value = var.db_name
-          },
-          {
-            name  = "DATABASE_URL"
-            value = "jdbc:postgresql://${aws_db_instance.airbyte.address}:${aws_db_instance.airbyte.port}/${var.db_name}"
-          }
-        ]
-      }
+  set {
+    name  = "global.storage.bucket.activityPayload"
+    value = aws_s3_bucket.airbyte_logs.id
+  }
 
-      # Worker configuration
-      worker = {
-        enabled      = true
-        replicaCount = 2
-        resources = {
-          requests = {
-            cpu    = "1000m"
-            memory = "2Gi"
-          }
-          limits = {
-            cpu    = "2000m"
-            memory = "4Gi"
-          }
-        }
-        extraEnv = [
-          {
-            name  = "DATABASE_HOST"
-            value = aws_db_instance.airbyte.address
-          },
-          {
-            name  = "DATABASE_PORT"
-            value = tostring(aws_db_instance.airbyte.port)
-          },
-          {
-            name  = "DATABASE_DB"
-            value = var.db_name
-          },
-          {
-            name  = "DATABASE_URL"
-            value = "jdbc:postgresql://${aws_db_instance.airbyte.address}:${aws_db_instance.airbyte.port}/${var.db_name}"
-          }
-        ]
-      }
+  set {
+    name  = "global.storage.s3.region"
+    value = "us-west-2"
+  }
 
-      # Temporal configuration
-      temporal = {
-        enabled      = true
-        replicaCount = 1
-        extraEnv = [
-          {
-            name  = "DATABASE_HOST"
-            value = aws_db_instance.airbyte.address
-          },
-          {
-            name  = "DATABASE_PORT"
-            value = tostring(aws_db_instance.airbyte.port)
-          },
-          {
-            name  = "DATABASE_DB"
-            value = var.db_name
-          },
-          {
-            name  = "DATABASE_URL"
-            value = "jdbc:postgresql://${aws_db_instance.airbyte.address}:${aws_db_instance.airbyte.port}/${var.db_name}"
-          }
-        ]
-      }
+  set {
+    name  = "global.storage.s3.authenticationType"
+    value = "instanceProfile"
+  }
 
-      # Bootloader configuration - fix database connection
-      bootloader = {
-        extraEnv = [
-          {
-            name  = "DATABASE_HOST"
-            value = aws_db_instance.airbyte.address
-          },
-          {
-            name  = "DATABASE_PORT"
-            value = tostring(aws_db_instance.airbyte.port)
-          },
-          {
-            name  = "DATABASE_DB"
-            value = var.db_name
-          },
-          {
-            name  = "DATABASE_URL"
-            value = "jdbc:postgresql://${aws_db_instance.airbyte.address}:${aws_db_instance.airbyte.port}/${var.db_name}"
-          }
-        ]
-      }
+  # Disable internal PostgreSQL
+  set {
+    name  = "postgresql.enabled"
+    value = "false"
+  }
 
-      # Disable internal PostgreSQL
-      postgresql = {
-        enabled = false
-      }
+  # Disable internal MinIO
+  set {
+    name  = "minio.enabled"
+    value = "false"
+  }
 
-      # Disable MinIO
-      minio = {
-        enabled = false
-      }
-    })
-  ]
+  # External database configuration - Chart V2 official schema
+  set {
+    name  = "global.database.type"
+    value = "external"
+  }
+
+  set {
+    name  = "global.database.secretName"
+    value = kubernetes_secret.database.metadata[0].name
+  }
+
+  set {
+    name  = "global.database.host"
+    value = aws_db_instance.airbyte.address
+  }
+
+  set {
+    name  = "global.database.port"
+    value = "5432"
+  }
+
+  set {
+    name  = "global.database.name"
+    value = var.db_name
+  }
+
+  set {
+    name  = "global.database.database"
+    value = var.db_name
+  }
+
+  set {
+    name  = "global.database.userSecretKey"
+    value = "DATABASE_USER"
+  }
+
+  set {
+    name  = "global.database.passwordSecretKey"
+    value = "DATABASE_PASSWORD"
+  }
+
+  # Expose server as LoadBalancer
+  set {
+    name  = "server.service.type"
+    value = "LoadBalancer"
+  }
 
   depends_on = [
     aws_eks_addon.ebs_csi_driver,
-    aws_db_instance.airbyte,
-    kubernetes_secret.database
+    kubernetes_secret.database,
+    kubernetes_service_account.airbyte
   ]
 }

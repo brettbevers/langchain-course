@@ -41,6 +41,18 @@ output "rds_database_name" {
   value       = aws_db_instance.airbyte.db_name
 }
 
+output "rds_username" {
+  description = "RDS master username"
+  value       = var.db_username
+  sensitive   = true
+}
+
+output "rds_password" {
+  description = "RDS master password"
+  value       = random_password.db_password.result
+  sensitive   = true
+}
+
 output "db_secret_arn" {
   description = "ARN of the secret containing database credentials"
   value       = aws_secretsmanager_secret.db_password.arn
@@ -49,6 +61,11 @@ output "db_secret_arn" {
 output "airbyte_namespace" {
   description = "Kubernetes namespace for Airbyte"
   value       = kubernetes_namespace.airbyte.metadata[0].name
+}
+
+output "airbyte_service_account_name" {
+  description = "Kubernetes service account name for Airbyte"
+  value       = kubernetes_service_account.airbyte.metadata[0].name
 }
 
 output "airbyte_service_account_role_arn" {

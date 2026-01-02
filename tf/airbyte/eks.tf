@@ -12,9 +12,9 @@ module "eks" {
   cluster_endpoint_private_access = true
 
   # Security groups
-  cluster_security_group_id               = aws_security_group.eks_cluster.id
-  cluster_additional_security_group_ids   = []
-  node_security_group_additional_rules    = {}
+  cluster_security_group_id             = aws_security_group.eks_cluster.id
+  cluster_additional_security_group_ids = []
+  node_security_group_additional_rules  = {}
 
   # EKS Managed Node Group
   eks_managed_node_groups = {

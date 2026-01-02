@@ -21,5 +21,5 @@ eks_node_min_size       = 1
 eks_node_max_size       = 4
 
 # Airbyte Configuration
-airbyte_version   = "0.50.0"
+airbyte_version   = "1.9.2"
 airbyte_namespace = "airbyte"
